@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/21 17:02:28 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/26 13:51:16 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/26 16:07:02 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,8 @@
 # include <unistd.h>
 # include <sys/wait.h>
 # include <sys/types.h>
- #include <unistd.h>
-
- #include <fcntl.h>
-
-
+# include <unistd.h>
+# include <fcntl.h>
 
 // PIPEX_UTILS.C
 void	ft_error(char *str);

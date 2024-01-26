@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/26 13:49:51 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/26 17:06:44 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,19 @@ void	ft_error(char *str)
 {
 	ft_printf("%s", str);
 	exit(1);
+}
+
+void	free_array(char **array)
+{
+	size_t	i;
+
+	i = 0;
+	while (array[i])
+	{
+		free(array[i]);
+		i++;
+	}
+	free(array);
 }
 
 /*
@@ -31,8 +44,7 @@ void	execute(char **env, char **input, char *cmd, int fd_array[2])
 	i = 0;
 	split_cmd = ft_split(cmd, ' ');
 	cmd_path = get_path(split_cmd[0], env);
-	//execve(cmd_path, split_cmd, env);
-	if (execve(cmd_path, split_cmd, env) == -1)
+	if (!cmd_path)
 	{
 		write(STDERR_FILENO, "Command '", 9);
 		while (cmd[i])
@@ -41,10 +53,18 @@ void	execute(char **env, char **input, char *cmd, int fd_array[2])
 			i++;
 		}
 		write(STDERR_FILENO, "' not found\n", 12);
-		ft_error("");
+		free_array(split_cmd);
+		exit(1);
 	}
+	execve(cmd_path, split_cmd, env);
 }
 
+		// while (split_cmd[i])
+		// {
+		// 	free(split_cmd[i]);
+		// 	i++;
+		// }
+		// free(split_cmd);
 /*
 ** locate the absolute path of a given commmand by searching through the
 ** directories listed in the environment variable
@@ -55,6 +75,7 @@ char	*get_path(char *cmd, char **env)
 	int		i;
 
 	i = 0;
+	// PATH doesnt exist what to do ?
 	while (env[i])
 	{
 		if (ft_strncmp("PATH=", env[i], 5) == 0)
@@ -83,7 +104,6 @@ char	*get_command_path(char *cmd, char **path)
 		tmp_path = ft_strjoin(path[i], "/");
 		cmd_path = ft_strjoin(tmp_path, cmd);
 		free(tmp_path);
-		//printf("path, before access check: %s\n", cmd_path);
 		if (access(cmd_path, X_OK) == 0)
 			return (cmd_path);
 		free(cmd_path);

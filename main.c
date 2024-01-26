@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 13:40:32 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/26 13:46:48 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/26 18:01:28 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void	handle_cmd1(char **env, char **input, int fd_array[2])
 	fd = open(input[1], O_RDONLY);
 	if (fd == -1)
 	{
-		ft_printf("pipex: %s: No such file or directory \n", input[1]);
+		ft_printf("pipex: %s: No such file or directory\n", input[1]);
 		ft_error("");
 	}
 	dup2(fd, STDIN_FILENO);
@@ -52,6 +52,12 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 
 	cmd = input[3];
 	fd = open(input[4], O_TRUNC | O_CREAT | O_RDWR, 0644);
+	if (fd == -1)
+	{
+		// should be different error message
+		ft_printf("pipex: %s: Permission denied\n", input[1]);
+		ft_error("");
+	}
 	dup2(fd, STDOUT_FILENO);
 	dup2(fd_array[0], STDIN_FILENO);
 	close(fd_array[1]);
@@ -79,6 +85,7 @@ int	main(int argc, char **argv, char **env)
 	{
 		handle_cmd1(env, argv, fd_array);
 	}
+	// second child for cmd2
 	waitpid(pid1, NULL, 0);
 	handle_cmd2(env, argv, fd_array);
 	return (0);

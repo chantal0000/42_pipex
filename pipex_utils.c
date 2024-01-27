@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/27 16:23:24 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/27 18:49:33 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,12 @@ void	ft_error(char *str)
 	exit(1);
 }
 
-void	ft_error_after_pipe(char *str, int fd_array[2])
+void	ft_error_after_pipe(char *str, int fd_array[2], int exit_status)
 {
 	ft_printf("%s", str);
 	close(fd_array[0]);
 	close(fd_array[1]);
-	exit(1);
+	exit(exit_status);
 }
 
 void	free_array(char **array)
@@ -63,10 +63,10 @@ int	execute(char **env, char **input, char *cmd, int fd_array[2])
 		write(STDERR_FILENO, "' not found\n", 12);
 		free_array(split_cmd);
 		//exit(1);
-		return (-1);
+		return (127);
 	}
 	execve(cmd_path, split_cmd, env);
-	return (-1);
+	return (127);
 }
 
 		// while (split_cmd[i])

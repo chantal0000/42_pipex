@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 13:40:32 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/27 16:20:10 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/27 18:46:34 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,7 @@ void	handle_cmd1(char **env, char **input, int fd_array[2])
 	if (fd == -1)
 	{
 		ft_printf("pipex: %s: No such file or directory\n", input[1]);
-		ft_error_after_pipe("", fd_array);
-
+		ft_error_after_pipe("", fd_array, 2);
 	}
 	dup2(fd, STDIN_FILENO);
 	// close(fd);
@@ -43,9 +42,9 @@ void	handle_cmd1(char **env, char **input, int fd_array[2])
 		close(fd_array[0]);
 		close(fd_array[1]);
 		close(fd);
+		exit(1);
 		//exit here?
 	}
-	// if execute
 }
 
 /*
@@ -68,7 +67,7 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 		ft_printf("pipex: %s: Permission denied\n", input[1]);
 		// close(fd_array[0]);
 		// close(fd_array[1]);
-		ft_error_after_pipe("", fd_array);
+		ft_error_after_pipe("", fd_array, 1);
 		//ft_error("");
 	}
 	dup2(fd, STDOUT_FILENO);
@@ -82,6 +81,7 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 		close(fd_array[0]);
 		close(fd_array[1]);
 		close(fd);
+		exit(1);
 		//exit here?
 	}
 }
@@ -94,6 +94,8 @@ int	main(int argc, char **argv, char **env)
 	int	fd_array[2];
 	int	id1;
 	int	id2;
+	int wstatus1;
+	int wstatus2;
 
 	if (argc != 5)
 		ft_error("./pipex infile cmd1 cm2 outfile\n");
@@ -104,20 +106,28 @@ int	main(int argc, char **argv, char **env)
 		ft_error("pipe\n");
 	id1 = fork();
 	if (id1 < 0)
-		ft_error_after_pipe("fork\n", fd_array);
+		ft_error_after_pipe("fork\n", fd_array, 1);
 	if (id1 == 0)
 		handle_cmd1(env, argv, fd_array);
 	id2 = fork ();
 	if (id2 < 0)
-		ft_error_after_pipe("fork\n", fd_array);
+		ft_error_after_pipe("fork\n", fd_array, 1);
 	if (id2 == 0)
 		handle_cmd2(env, argv, fd_array);
 	close(fd_array[0]);
 	close(fd_array[1]);
-	// second child for cmd2
-	// here include macro exitstatus?
-	waitpid(id1, NULL, 0);
-	waitpid(id2, NULL, 0);
-	//handle_cmd2(env, argv, fd_array);
-	return (0);
+	waitpid(id1, &wstatus1, 0);
+	waitpid(id2, &wstatus2, 0);
+	int exit_status_id1;
+	int exit_status_id2;
+	if (WIFEXITED(wstatus1))
+	{
+		exit_status_id1 = WEXITSTATUS(wstatus1);
+	}
+	if (WIFEXITED(wstatus2))
+	{
+		exit_status_id2 = WEXITSTATUS(wstatus2);
+	}
+	//check_exit(wstatus);
+	return (exit_status_id1 > exit_status_id2 ? exit_status_id1 : exit_status_id2);
 }

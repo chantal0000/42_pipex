@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 13:40:32 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/27 14:56:44 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/27 15:44:11 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,6 @@ void	handle_cmd1(char **env, char **input, int fd_array[2])
 	if (fd == -1)
 	{
 		ft_printf("pipex: %s: No such file or directory\n", input[1]);
-		// close(fd_array[0]);
-		// close(fd_array[1]);
-		// ft_error("");
 		ft_error_after_pipe("", fd_array);
 
 	}
@@ -40,7 +37,15 @@ void	handle_cmd1(char **env, char **input, int fd_array[2])
 	// close(fd);
 	dup2(fd_array[1], STDOUT_FILENO);
 	close(fd_array[0]);
-	execute(env, input, cmd, fd_array);
+	if (execute(env, input, cmd, fd_array) == -1)
+	{
+		//write(STDERR_FILENO, "-1\n", 3);
+		close(fd_array[0]);
+		close(fd_array[1]);
+		close(fd);
+		//exit here?
+	}
+	// if execute
 }
 
 /*
@@ -70,7 +75,15 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 	//close(fd);
 	dup2(fd_array[0], STDIN_FILENO);
 	close(fd_array[1]);
-	execute(env, input, cmd, fd_array);
+	//execute(env, input, cmd, fd_array);
+	if (execute(env, input, cmd, fd_array) == -1)
+	{
+		//write(STDERR_FILENO, "-1\n", 3);
+		close(fd_array[0]);
+		close(fd_array[1]);
+		close(fd);
+		//exit here?
+	}
 }
 
 // open argv[1] only reading? & argv[4] allowing everything?

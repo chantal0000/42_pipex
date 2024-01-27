@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/27 15:02:21 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/27 16:11:48 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	free_array(char **array)
 ** 'execve' loads and exectues a new program referred to by
 ** the specific file path in the current process, replaces the current process
 */
-void	execute(char **env, char **input, char *cmd, int fd_array[2])
+int	execute(char **env, char **input, char *cmd, int fd_array[2])
 {
 	char	**split_cmd;
 	char	*cmd_path;
@@ -62,9 +62,11 @@ void	execute(char **env, char **input, char *cmd, int fd_array[2])
 		}
 		write(STDERR_FILENO, "' not found\n", 12);
 		free_array(split_cmd);
-		exit(1);
+		//exit(1);
+		return (-1);
 	}
 	execve(cmd_path, split_cmd, env);
+	return (-1);
 }
 
 		// while (split_cmd[i])
@@ -81,7 +83,9 @@ char	*get_path(char *cmd, char **env, int fd_array[2])
 {
 	char	**path;
 	int		i;
+	int		flag;
 
+	flag = 1;
 	i = 0;
 	// PATH doesnt exist what to do ?
 	while (env[i])
@@ -89,9 +93,15 @@ char	*get_path(char *cmd, char **env, int fd_array[2])
 		if (ft_strncmp("PATH=", env[i], 5) == 0)
 		{
 			path = ft_split(env[i] + 5, 58);
+			flag = 0;
 			break ;
 		}
 		i++;
+	}
+	// if "PATH=" not found?
+	if (flag != 0)
+	{
+		ft_error_after_pipe("path not found\n", fd_array);
 	}
 	return (get_command_path(cmd, path, fd_array));
 }
@@ -107,13 +117,21 @@ char	*get_command_path(char *cmd, char **path, int fd_array[2])
 	int		i;
 
 	i = 0;
+	if (access(cmd, X_OK) == 0)
+	{
+	//	printf("cmd_path %s\n", cmd_path);
+		return (cmd);
+	}
 	while (path[i])
 	{
 		tmp_path = ft_strjoin(path[i], "/");
 		cmd_path = ft_strjoin(tmp_path, cmd);
 		free(tmp_path);
 		if (access(cmd_path, X_OK) == 0)
+		{
+		//	printf("cmd_path %s\n", cmd_path);
 			return (cmd_path);
+		}
 		free(cmd_path);
 		i++;
 	}

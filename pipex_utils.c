@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/26 17:06:44 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/27 15:02:21 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,14 @@
 void	ft_error(char *str)
 {
 	ft_printf("%s", str);
+	exit(1);
+}
+
+void	ft_error_after_pipe(char *str, int fd_array[2])
+{
+	ft_printf("%s", str);
+	close(fd_array[0]);
+	close(fd_array[1]);
 	exit(1);
 }
 
@@ -43,7 +51,7 @@ void	execute(char **env, char **input, char *cmd, int fd_array[2])
 
 	i = 0;
 	split_cmd = ft_split(cmd, ' ');
-	cmd_path = get_path(split_cmd[0], env);
+	cmd_path = get_path(split_cmd[0], env, fd_array);
 	if (!cmd_path)
 	{
 		write(STDERR_FILENO, "Command '", 9);
@@ -69,7 +77,7 @@ void	execute(char **env, char **input, char *cmd, int fd_array[2])
 ** locate the absolute path of a given commmand by searching through the
 ** directories listed in the environment variable
 */
-char	*get_path(char *cmd, char **env)
+char	*get_path(char *cmd, char **env, int fd_array[2])
 {
 	char	**path;
 	int		i;
@@ -85,14 +93,14 @@ char	*get_path(char *cmd, char **env)
 		}
 		i++;
 	}
-	return (get_command_path(cmd, path));
+	return (get_command_path(cmd, path, fd_array));
 }
 
 /*
 ** join the path to one string and add the name of the command to create the
 ** whole cmd_path
 */
-char	*get_command_path(char *cmd, char **path)
+char	*get_command_path(char *cmd, char **path, int fd_array[2])
 {
 	char	*tmp_path;
 	char	*cmd_path;

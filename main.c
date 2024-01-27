@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 13:40:32 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/26 18:01:28 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/27 14:56:44 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,14 @@ void	handle_cmd1(char **env, char **input, int fd_array[2])
 	if (fd == -1)
 	{
 		ft_printf("pipex: %s: No such file or directory\n", input[1]);
-		ft_error("");
+		// close(fd_array[0]);
+		// close(fd_array[1]);
+		// ft_error("");
+		ft_error_after_pipe("", fd_array);
+
 	}
 	dup2(fd, STDIN_FILENO);
+	// close(fd);
 	dup2(fd_array[1], STDOUT_FILENO);
 	close(fd_array[0]);
 	execute(env, input, cmd, fd_array);
@@ -56,9 +61,13 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 	{
 		// should be different error message
 		ft_printf("pipex: %s: Permission denied\n", input[1]);
-		ft_error("");
+		// close(fd_array[0]);
+		// close(fd_array[1]);
+		ft_error_after_pipe("", fd_array);
+		//ft_error("");
 	}
 	dup2(fd, STDOUT_FILENO);
+	//close(fd);
 	dup2(fd_array[0], STDIN_FILENO);
 	close(fd_array[1]);
 	execute(env, input, cmd, fd_array);
@@ -70,23 +79,32 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 int	main(int argc, char **argv, char **env)
 {
 	int	fd_array[2];
-	int	pid1;
+	int	id1;
+	int	id2;
 
 	if (argc != 5)
 		ft_error("./pipex infile cmd1 cm2 outfile\n");
 	if (!env || !*env)
 		ft_error("Error: env\n");
+		// ab hier muss ich pipe auch bei error schliessen
 	if (pipe(fd_array) == -1)
 		ft_error("pipe\n");
-	pid1 = fork();
-	if (pid1 < 0)
-		ft_error("fork\n");
-	if (pid1 == 0)
-	{
+	id1 = fork();
+	if (id1 < 0)
+		ft_error_after_pipe("fork\n", fd_array);
+	if (id1 == 0)
 		handle_cmd1(env, argv, fd_array);
-	}
+	id2 = fork ();
+	if (id2 < 0)
+		ft_error_after_pipe("fork\n", fd_array);
+	if (id2 == 0)
+		handle_cmd2(env, argv, fd_array);
+	close(fd_array[0]);
+	close(fd_array[1]);
 	// second child for cmd2
-	waitpid(pid1, NULL, 0);
-	handle_cmd2(env, argv, fd_array);
+	// here include macro exitstatus?
+	waitpid(id1, NULL, 0);
+	waitpid(id2, NULL, 0);
+	//handle_cmd2(env, argv, fd_array);
 	return (0);
 }

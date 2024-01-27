@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/27 16:11:48 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/27 16:17:01 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,9 +83,7 @@ char	*get_path(char *cmd, char **env, int fd_array[2])
 {
 	char	**path;
 	int		i;
-	int		flag;
 
-	flag = 1;
 	i = 0;
 	// PATH doesnt exist what to do ?
 	while (env[i])
@@ -93,17 +91,10 @@ char	*get_path(char *cmd, char **env, int fd_array[2])
 		if (ft_strncmp("PATH=", env[i], 5) == 0)
 		{
 			path = ft_split(env[i] + 5, 58);
-			flag = 0;
 			break ;
 		}
 		i++;
 	}
-	// if "PATH=" not found?
-	if (flag != 0)
-	{
-		ft_error_after_pipe("path not found\n", fd_array);
-	}
-	return (get_command_path(cmd, path, fd_array));
 }
 
 /*

@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/27 16:17:01 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/27 16:23:24 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,9 @@ char	*get_path(char *cmd, char **env, int fd_array[2])
 		}
 		i++;
 	}
+	// if "PATH=" not found?
+
+	return (get_command_path(cmd, path, fd_array));
 }
 
 /*

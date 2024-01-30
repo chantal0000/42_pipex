@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/27 18:49:33 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/30 12:44:49 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,10 +63,10 @@ int	execute(char **env, char **input, char *cmd, int fd_array[2])
 		write(STDERR_FILENO, "' not found\n", 12);
 		free_array(split_cmd);
 		//exit(1);
-		return (127);
+		return (-1);
 	}
 	execve(cmd_path, split_cmd, env);
-	return (127);
+	// returns -1 if it fails -
 }
 
 		// while (split_cmd[i])
@@ -95,8 +95,8 @@ char	*get_path(char *cmd, char **env, int fd_array[2])
 		}
 		i++;
 	}
-	// if "PATH=" not found?
-
+	 if (!path)
+		return (NULL);
 	return (get_command_path(cmd, path, fd_array));
 }
 

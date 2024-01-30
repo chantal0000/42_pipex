@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/30 12:44:49 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/30 14:19:45 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,12 +61,14 @@ int	execute(char **env, char **input, char *cmd, int fd_array[2])
 			i++;
 		}
 		write(STDERR_FILENO, "' not found\n", 12);
-		free_array(split_cmd);
+		if (split_cmd)
+			free_array(split_cmd);
 		//exit(1);
 		return (-1);
 	}
 	execve(cmd_path, split_cmd, env);
 	// returns -1 if it fails -
+	return (-1);
 }
 
 		// while (split_cmd[i])

@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 13:40:32 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/30 12:45:19 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/30 14:29:25 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,18 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 		exit(1);
 	}
 }
-
+int	cmd_empty(char *cmd)
+{
+	int	i;
+	i = 0;
+	while(cmd[i])
+	{
+		if (cmd[i] != 32)
+			return (0);
+		i++;
+	}
+	return (1);
+}
 // open argv[1] only reading? & argv[4] allowing everything?
 // open the infile argv[1] -> read only permission
 // open/ create outfile argv[4] -> more permission?
@@ -88,7 +99,7 @@ int	main(int argc, char **argv, char **env)
 	int wstatus1;
 	int wstatus2;
 
-	if (argc != 5)
+	if (argc != 5 || (cmd_empty(argv[2]) == 1) || (cmd_empty(argv[3]) == 1))
 		ft_error("./pipex infile cmd1 cm2 outfile\n");
 	if (!env || !*env)
 		ft_error("Error: env\n");

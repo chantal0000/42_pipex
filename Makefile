@@ -6,7 +6,7 @@
 #    By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/11/06 11:14:10 by chbuerge          #+#    #+#              #
-#    Updated: 2024/01/24 14:40:09 by chbuerge         ###   ########.fr        #
+#    Updated: 2024/01/30 18:11:47 by chbuerge         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,8 @@ LIBFT_DIR = ./libft
 
 # list of the source files srequired to build the project
 SRCS =		main.c \
-			pipex_utils.c
+			pipex_utils.c \
+			error_handling.c
 
 # defines the object files that will be generated from the cource files
 OBJS = ${SRCS:.c=.o}

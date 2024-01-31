@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 13:40:32 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/30 18:06:52 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/31 15:48:37 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,17 +40,18 @@ void	handle_cmd1(char **env, char **input, int fd_array[2])
 	dup2(fd, STDIN_FILENO);
 	dup2(fd_array[1], STDOUT_FILENO);
 	close(fd_array[0]);
-	if (execute(env, input, cmd, fd_array) == -1)
+	if (execute_cmd(env, input, cmd, fd_array) == -1)
 	{
 		close(fd_array[0]);
 		close(fd_array[1]);
 		close(fd);
+		exit(EXIT_FAILURE);
 	}
 }
 
 /*
 ** 0 file type & special permission, regular file in our case
-** 644 permissions
+** 644 permission (6 owner -> read & write), (group & others -> read)
 ** O_TRUNC -> no effect if file does not exist otherwise truncs file
 ** O_CREAT -> if file does not exist it will be created
 ** O_RDWR -> open file for reading and writing
@@ -70,7 +71,7 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 	dup2(fd, STDOUT_FILENO);
 	dup2(fd_array[0], STDIN_FILENO);
 	close(fd_array[1]);
-	if (execute(env, input, cmd, fd_array) == -1)
+	if (execute_cmd(env, input, cmd, fd_array) == -1)
 	{
 		close(fd_array[0]);
 		close(fd_array[1]);
@@ -79,6 +80,9 @@ void	handle_cmd2(char **env, char **input, int fd_array[2])
 	}
 }
 
+/*
+** check if commands are not empty nor just spaces
+*/
 int	cmd_empty(char *cmd)
 {
 	int	i;
@@ -93,25 +97,30 @@ int	cmd_empty(char *cmd)
 	return (1);
 }
 
-// int	handle_exit_status(int id1, int id2)
-// {
-// 	int	status1 = 0;
-// 	int	status2 = 0;
-// 	int	exit_status = 0;
-// 	int	i = 0;
-// 	waitpid(id1, &status1, WUNTRACED);
-// 	waitpid(id2, &status2, WUNTRACED);
-// 	if(WIFEXITED(status2))
-// 	{
-// 		exit_status = WEXITSTATUS(status2);
-// 		i = exit_status;
-// 	}
-// 	return (i);
-// }
+int	handle_exit_status(int id1, int id2)
+{
+	int	status1;
+	int	status2;
+	int	exit_status;
+
+	status1 = 0;
+	status2 = 0;
+	exit_status = 0;
+	waitpid(id1, &status1, WUNTRACED);
+	waitpid(id2, &status2, WUNTRACED);
+	if (WIFEXITED(status2))
+		exit_status = WEXITSTATUS(status2);
+	return (exit_status);
+}
 
 // open argv[1] only reading? & argv[4] allowing everything?
 // open the infile argv[1] -> read only permission
 // open/ create outfile argv[4] -> more permission?
+
+/*
+** Check if command line arguments are valid and execute the pipeline.
+**
+*/
 int	main(int argc, char **argv, char **env)
 {
 	int	fd_array[2];
@@ -136,7 +145,5 @@ int	main(int argc, char **argv, char **env)
 		handle_cmd2(env, argv, fd_array);
 	close(fd_array[0]);
 	close(fd_array[1]);
-	waitpid(id1, NULL, 0);
-	waitpid(id2, NULL, 0);
-	return (0);
+	return (handle_exit_status(id1, id2));
 }

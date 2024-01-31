@@ -6,7 +6,7 @@
 /*   By: chbuerge <chbuerge@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/24 14:17:47 by chbuerge          #+#    #+#             */
-/*   Updated: 2024/01/30 18:11:24 by chbuerge         ###   ########.fr       */
+/*   Updated: 2024/01/31 15:02:57 by chbuerge         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 ** 'execve' loads and exectues a new program referred to by
 ** the specific file path in the current process, replaces the current process
 */
-int	execute(char **env, char **input, char *cmd, int fd_array[2])
+int	execute_cmd(char **env, char **input, char *cmd, int fd_array[2])
 {
 	char	**split_cmd;
 	char	*cmd_path;
@@ -24,7 +24,7 @@ int	execute(char **env, char **input, char *cmd, int fd_array[2])
 
 	i = 0;
 	split_cmd = ft_split(cmd, ' ');
-	cmd_path = get_path(split_cmd[0], env, fd_array);
+	cmd_path = find_cmd_path(split_cmd[0], env, fd_array, input);
 	if (!cmd_path)
 	{
 		write(STDERR_FILENO, "Command '", 9);
@@ -38,20 +38,22 @@ int	execute(char **env, char **input, char *cmd, int fd_array[2])
 			free_array(split_cmd);
 		return (-1);
 	}
-	execve(cmd_path, split_cmd, env);
-	return (-1);
+	if (execve(cmd_path, split_cmd, env) != 1)
+		exit (127);
+	return (127);
 }
 
 /*
 ** locate the absolute path of a given commmand by searching through the
 ** directories listed in the environment variable
 */
-char	*get_path(char *cmd, char **env, int fd_array[2])
+char	*find_cmd_path(char *cmd, char **env, int fd_array[2], char **input)
 {
 	char	**path;
 	int		i;
 
 	i = 0;
+	path = NULL;
 	while (env[i])
 	{
 		if (ft_strncmp("PATH=", env[i], 5) == 0)
